@@ -5,12 +5,14 @@ require('dotenv').config();
 
 const app = express();
 
-// Enable CORS for all routes or specific origins
-app.use(cors({     
-    origin: ['http://localhost:5173', 'https://ping-pong-woad.vercel.app/'],
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+// Enable CORS
+app.use(cors({
+    origin: 'http://localhost:5173',
+    methods: ['POST'], // Only allow POST requests
     allowedHeaders: ['Content-Type'],
 }));
+
+// Parse JSON request body
 app.use(express.json());
 
 // Decode the Base64 credentials from the .env file
@@ -32,7 +34,7 @@ app.post('/api/add-match', async (req, res) => {
 
     try {
         const sheets = google.sheets({ version: 'v4', auth });
-        const spreadsheetId = process.env.SPREADSHEET; 
+        const spreadsheetId = process.env.SPREADSHEET;
 
         await sheets.spreadsheets.values.append({
             spreadsheetId,
@@ -48,6 +50,11 @@ app.post('/api/add-match', async (req, res) => {
         console.error('Error appending to sheet:', error);
         res.status(500).json({ error: 'Failed to add match' });
     }
+});
+
+// Fallback for unsupported HTTP methods
+app.all('/api/add-match', (req, res) => {
+    res.status(405).json({ error: 'Method Not Allowed' });
 });
 
 // Start the server (for local testing)
