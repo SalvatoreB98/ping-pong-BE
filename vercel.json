@@ -1,8 +1,9 @@
 {
-    "version": 2,
-    "functions": {
-      "api/*.js": {
-        "runtime": "nodejs16.x"
-      }
+  "version": 2,
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/index.js"
     }
-  }
+  ]
+}
