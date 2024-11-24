@@ -32,7 +32,7 @@ app.post('/api/add-match', async (req, res) => {
 
     try {
         const sheets = google.sheets({ version: 'v4', auth });
-        const spreadsheetId = 'YOUR_SPREADSHEET_ID'; // Replace with your Google Sheet ID
+        const spreadsheetId = process.env.SPREADSHEET; 
 
         await sheets.spreadsheets.values.append({
             spreadsheetId,
