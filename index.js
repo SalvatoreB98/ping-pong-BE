@@ -6,7 +6,11 @@ require('dotenv').config();
 const app = express();
 
 // Enable CORS for all routes or specific origins
-app.use(cors({ origin: 'http://localhost:5173' })); // Allow requests from your frontend's origin
+app.use(cors({     
+    origin: ['http://localhost:5173', 'https://ping-pong-woad.vercel.app/'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type'],
+}));
 app.use(express.json());
 
 // Decode the Base64 credentials from the .env file
