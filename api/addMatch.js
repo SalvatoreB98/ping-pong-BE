@@ -16,7 +16,7 @@ const auth = new google.auth.GoogleAuth({
     scopes: ['https://www.googleapis.com/auth/spreadsheets'],
 });
 
-app.post('/api/add-match', async (req, res) => {
+app.post('/api/addMatch', async (req, res) => {
     const { date, player1, player2, p1Score, p2Score } = req.body;
 
     if (!date || !player1 || !player2 || p1Score === undefined || p2Score === undefined) {
