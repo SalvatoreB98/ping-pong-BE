@@ -39,15 +39,13 @@ app.post('/api/add-match', async (req, res) => {
         res.status(200).json({ message: 'Match added successfully' });
     } catch (error) {
         console.error('Error appending to sheet:', error);
-        res.status(500).json({
-            error: 'Failed to add match.',
-            details: error.message,
-        });
+        res.status(500).json({ error: 'Failed to add match' });
     }
 });
 
+// Block all other methods (GET, PUT, DELETE, etc.)
 app.all('/api/add-match', (req, res) => {
-    res.status(405).json({ error: 'Method Not Allowed' });
+    res.status(405).json({ error: `${req.method} method not allowed on this route.` });
 });
 
 const PORT = process.env.PORT || 3000;
