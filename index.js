@@ -6,7 +6,7 @@ const cors = require('cors');
 const app = express();
 
 const corsOptions = {
-    origin: ['http://localhost:3000', 'https://ping-pong-woad.vercel.app'],
+    origin: ['http://localhost*', 'https://ping-pong-woad.vercel.app'],
     methods: [ 'POST'], // Allowed methods
   };
 app.use(cors(corsOptions));
