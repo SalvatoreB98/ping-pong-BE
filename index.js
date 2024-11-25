@@ -1,22 +1,11 @@
 const express = require('express');
 const { google } = require('googleapis');
 require('dotenv').config();
-const app = express();
 const cors = require('cors');
 
-const allowedOrigins = ['http://localhost:5173', 'https://ping-pong-woad.vercel.app']; // Your frontend origins
+const app = express();
 
-app.use(cors({
-    origin: (origin, callback) => {
-        if (!origin || allowedOrigins.includes(origin)) {
-            callback(null, true); // Allow the request
-        } else {
-            callback(new Error('Not allowed by CORS')); // Reject other origins
-        }
-    },
-    methods: ['POST'], // Allow only POST requests
-    allowedHeaders: ['Content-Type'], // Headers allowed in the request
-}));
+app.use(cors());
 
 app.use(express.json());
 
