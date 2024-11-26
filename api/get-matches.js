@@ -17,19 +17,52 @@ module.exports = async (req, res) => {
         const sheets = google.sheets({ version: 'v4', auth });
         const spreadsheetId = process.env.SPREADSHEET;
 
-        const response = await sheets.spreadsheets.values.get({
+        const matchesResponse = await sheets.spreadsheets.values.get({
             spreadsheetId,
             range: 'Partite',
         });
 
-        const data = response.data;
-        console.log("after response", data)
-        const objToSend = parseData(data);
-        console.log("objToSend", objToSend)
+        if (!matchesResponse.data.values) {
+            return res.status(404).json({ error: 'No match data found in Partite sheet.' });
+        }
+
+        const matchData = matchesResponse.data;
+        const objToSend = parseData(matchData);
+
+        // Fetch player data from the 'Giocatori' sheet
+        const playersResponse = await sheets.spreadsheets.values.get({
+            spreadsheetId,
+            range: 'Giocatori',
+        });
+
+        if (!playersResponse.data.values) {
+            return res.status(404).json({ error: 'No player data found in Giocatori sheet.' });
+        }
+
+        const playersData = playersResponse.data.values;
+
+        // Extract player names
+        const [headers, ...rows] = playersData;
+        const nameColumnIndex = headers.findIndex(header =>
+            header.toLowerCase() === 'name'
+        ); // Case-insensitive check for 'name'
+
+        if (nameColumnIndex === -1) {
+            return res.status(404).json({ error: "No 'name' column found in Giocatori sheet." });
+        }
+
+        const players = rows
+            .map(row => row[nameColumnIndex])
+            .filter(player => player); // Filter out any empty player names
+
+        // Add players to the object to send
+        objToSend.players = players;
+
+        console.log("objToSend", objToSend);
 
         res.status(200).json(objToSend);
     } catch (error) {
-        console.error('Error fetching matches:', error);
-        res.status(500).json({ error: 'Failed to fetch match data and statistics.' });
+        console.error('Error fetching matches or players:', error.message);
+        res.status(500).json({ error: 'Failed to fetch match or player data.' });
     }
 };
