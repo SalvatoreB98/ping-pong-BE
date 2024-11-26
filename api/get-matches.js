@@ -53,7 +53,7 @@ module.exports = async (req, res) => {
 
         const players = rows
             .map(row => row[nameColumnIndex])
-            .filter(player => player); // Filter out any empty player names
+            .filter(player => player); // Filter any empty player names
 
         // Add players to the object to send
         objToSend.players = players;
