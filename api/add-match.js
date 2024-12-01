@@ -6,7 +6,7 @@ const cors = require('cors');
 const app = express();
 
 const corsOptions = {
-    origin: ['http://localhost:3000', 'https://ping-pong-woad.vercel.app/'],
+    origin: ['http://localhost:*', 'https://ping-pong-woad.vercel.app/'],
     methods: [ 'POST'], // Allowed methods
   };
 app.use(cors(corsOptions));
@@ -23,7 +23,7 @@ const auth = new google.auth.GoogleAuth({
 });
 
 app.post('/api/add-match', async (req, res) => {
-    const { date, player1, player2, p1Score, p2Score } = req.body;
+    const { date, player1, player2, p1Score, p2Score, setPoints, matchId } = req.body;
 
     if (!date || !player1 || !player2 || p1Score === undefined || p2Score === undefined) {
         return res.status(400).json({ error: 'Invalid data. Ensure all fields are provided.' });
@@ -41,6 +41,17 @@ app.post('/api/add-match', async (req, res) => {
                 values: [[date, player1, player2, p1Score, p2Score]],
             },
         });
+        const setsValues = setPoints.map(point => [point.player1, point.player2, matchId]);
+        console.info("APPENDOOOOOOOOOOOO:", setsValues)
+        await sheets.spreadsheets.values.append({
+            spreadsheetId,
+            range: 'SetPoints',
+            valueInputOption: 'USER_ENTERED',
+            resource: {
+                values: setsValues,
+            },
+        });
+
 
         res.status(200).json({ message: 'Match added successfully' });
     } catch (error) {
@@ -54,9 +65,5 @@ app.all('/api/add-match', (req, res) => {
     res.status(405).json({ error: `${req.method} method not allowed on this route.` });
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
-});
 
 module.exports = app; 
