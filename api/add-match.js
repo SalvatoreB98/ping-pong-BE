@@ -16,7 +16,6 @@ app.use(cors(corsOptions));
 app.use(express.json());
 
 const credentials = JSON.parse(Buffer.from(process.env.JSON_KEYS, 'base64').toString('utf-8'));
-console.log("KEYS" , process.env.JSON_KEYS)
 const auth = new google.auth.GoogleAuth({
     credentials,
     scopes: ['https://www.googleapis.com/auth/spreadsheets'],
@@ -32,7 +31,6 @@ app.post('/api/add-match', async (req, res) => {
     try {
         const sheets = google.sheets({ version: 'v4', auth });
         const spreadsheetId = process.env.SPREADSHEET;
-        console.log("env" , process.env)
         await sheets.spreadsheets.values.append({
             spreadsheetId,
             range: 'Partite',
