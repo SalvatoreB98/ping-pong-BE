@@ -52,6 +52,4 @@ function calculatePoints() {
     players.forEach(player => {
         points[player] = ((wins[player] / totPlayed[player]) * 100 || 0).toFixed(1);
     });
-    console.log("players", players);
-
 }

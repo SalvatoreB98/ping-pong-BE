@@ -40,7 +40,6 @@ app.post('/api/add-match', async (req, res) => {
             },
         });
         const setsValues = setPoints.map(point => [point.player1, point.player2, matchId]);
-        console.info("APPENDOOOOOOOOOOOO:", setsValues)
         await sheets.spreadsheets.values.append({
             spreadsheetId,
             range: 'SetPoints',
