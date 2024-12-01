@@ -2,17 +2,6 @@ const { google } = require('googleapis');
 require('dotenv').config();
 const { parseData } = require('../utils/stats.js');
 
-const groupSetsByMatchId = (setsPoint) => {
-    return setsPoint.slice(1).reduce((acc, set) => {
-        console.info("set point", setsPoint);
-        const matchId = set[0]; // Match ID
-        const points = [parseInt(set[1], 10), parseInt(set[2], 10)]; // Points for the set
-        if (!acc[matchId]) acc[matchId] = [];
-        acc[matchId].push(points);
-        return acc;
-    }, {});
-};
-
 module.exports = async (req, res) => {
     const credentials = JSON.parse(Buffer.from(process.env.JSON_KEYS, 'base64').toString('utf-8'));
     const auth = new google.auth.GoogleAuth({
@@ -27,7 +16,7 @@ module.exports = async (req, res) => {
     try {
         const sheets = google.sheets({ version: 'v4', auth });
         const spreadsheetId = process.env.SPREADSHEET;
-        // Fetch matches data
+
         const matchesResponse = await sheets.spreadsheets.values.get({
             spreadsheetId,
             range: 'Partite',
@@ -37,39 +26,10 @@ module.exports = async (req, res) => {
             return res.status(404).json({ error: 'No match data found in Partite sheet.' });
         }
 
-        const matchesData = matchesResponse.data.values;
+        const matchData = matchesResponse.data;
+        const objToSend = parseData(matchData);
 
-        // Fetch setsPoint data
-        const setsPointResponse = await sheets.spreadsheets.values.get({
-            spreadsheetId,
-            range: 'SetPoints',
-        });
-
-        if (!setsPointResponse.data.values) {
-            return res.status(404).json({ error: 'No set points data found in SetPoint sheet.' });
-        }
-
-        const setsPointData = setsPointResponse.data.values;
-
-        // Group sets by match ID
-        const groupedSets = groupSetsByMatchId(setsPointData);
-
-        // Process matches data and combine with grouped sets
-        const objToSend = matchesData.slice(1).map(match => {
-            console.log("groupedSets outside", groupedSets)
-            const [id, date, giocatore1, giocatore2, p1, p2] = match;
-            return {
-                id,
-                data: date,
-                giocatore1,
-                giocatore2,
-                p1,
-                p2,
-                sets: groupedSets[id] || [], // Include grouped sets or an empty array if no sets
-            };
-        });
-
-        // Fetch player data
+        // Fetch player data from the 'Giocatori' sheet
         const playersResponse = await sheets.spreadsheets.values.get({
             spreadsheetId,
             range: 'Giocatori',
@@ -95,9 +55,12 @@ module.exports = async (req, res) => {
             .map(row => row[nameColumnIndex])
             .filter(player => player); // Filter any empty player names
 
-        // Add players to the response
+        // Add players to the object to send
         objToSend.players = players;
-        res.status(200).json({ success: true, data: objToSend });
+
+        console.log("objToSend", objToSend);
+
+        res.status(200).json(objToSend);
     } catch (error) {
         console.error('Error fetching matches or players:', error.message);
         res.status(500).json({ error: 'Failed to fetch match or player data.' });
