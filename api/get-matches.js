@@ -16,7 +16,7 @@ module.exports = async (req, res) => {
     try {
         const sheets = google.sheets({ version: 'v4', auth });
         const spreadsheetId = process.env.SPREADSHEET;
-
+        console.info(spreadsheetId)
         const matchesResponse = await sheets.spreadsheets.values.get({
             spreadsheetId,
             range: 'Partite',
