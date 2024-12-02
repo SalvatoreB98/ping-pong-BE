@@ -1,6 +1,7 @@
 const { google } = require('googleapis');
 require('dotenv').config();
 const { parseData } = require('../utils/stats.js');
+const { groupSetsByMatchId, joinMatchesWithSets } = require('../utils/joinMatchesWithSets.JS');
 
 module.exports = async (req, res) => {
     const credentials = JSON.parse(Buffer.from(process.env.JSON_KEYS, 'base64').toString('utf-8'));
@@ -17,6 +18,7 @@ module.exports = async (req, res) => {
         const sheets = google.sheets({ version: 'v4', auth });
         const spreadsheetId = process.env.SPREADSHEET;
 
+        // Fetch matches data
         const matchesResponse = await sheets.spreadsheets.values.get({
             spreadsheetId,
             range: 'Partite',
@@ -26,39 +28,41 @@ module.exports = async (req, res) => {
             return res.status(404).json({ error: 'No match data found in Partite sheet.' });
         }
 
-        const matchData = matchesResponse.data;
-        const objToSend = parseData(matchData);
+        const matchesData = matchesResponse.data; // Raw data
+        console.log('Raw matchesData:', matchesData);
 
-        // Fetch player data from the 'Giocatori' sheet
-        const playersResponse = await sheets.spreadsheets.values.get({
+        // Parse matches data using parseData
+        const { players, matches, wins, totPlayed, points, } = parseData(matchesData);
+        console.log('Parsed matches:', matches);
+
+        // Fetch setsPoint data
+        const setsPointsResponse = await sheets.spreadsheets.values.get({
             spreadsheetId,
-            range: 'Giocatori',
+            range: 'SetsPoints!A:C',
         });
 
-        if (!playersResponse.data.values) {
-            return res.status(404).json({ error: 'No player data found in Giocatori sheet.' });
+        if (!setsPointsResponse.data.values) {
+            return res.status(404).json({ error: 'No set points data found in SetsPoints sheet.' });
         }
 
-        const playersData = playersResponse.data.values;
+        const setsPointsData = setsPointsResponse.data.values;
 
-        // Extract player names
-        const [headers, ...rows] = playersData;
-        const nameColumnIndex = headers.findIndex(header =>
-            header.toLowerCase() === 'name'
-        ); // Case-insensitive check for 'name'
+        // Group sets by match ID
+        const groupedSets = groupSetsByMatchId(setsPointsData);
 
-        if (nameColumnIndex === -1) {
-            return res.status(404).json({ error: "No 'name' column found in Giocatori sheet." });
-        }
+        // Combine matches with sets
+        const matchesWithSets = joinMatchesWithSets(matches, groupedSets);
 
-        const players = rows
-            .map(row => row[nameColumnIndex])
-            .filter(player => player); // Filter any empty player names
+        // Construct final response
+        const objToSend = {
+            players,
+            matches: matchesWithSets,
+            wins,
+            totPlayed,
+            points
+        };
 
-        // Add players to the object to send
-        objToSend.players = players;
-
-        console.log("objToSend", objToSend);
+        console.log('Final objToSend:', objToSend);
 
         res.status(200).json(objToSend);
     } catch (error) {

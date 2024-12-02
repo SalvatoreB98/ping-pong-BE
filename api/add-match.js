@@ -22,7 +22,7 @@ const auth = new google.auth.GoogleAuth({
 });
 
 app.post('/api/add-match', async (req, res) => {
-    const { date, player1, player2, p1Score, p2Score, setPoints, matchId } = req.body;
+    const { matchId, date, player1, player2, p1Score, p2Score, setsPoints } = req.body;
 
     if (!date || !player1 || !player2 || p1Score === undefined || p2Score === undefined) {
         return res.status(400).json({ error: 'Invalid data. Ensure all fields are provided.' });
@@ -36,13 +36,13 @@ app.post('/api/add-match', async (req, res) => {
             range: 'Partite',
             valueInputOption: 'USER_ENTERED',
             resource: {
-                values: [[date, player1, player2, p1Score, p2Score]],
+                values: [[matchId, date, player1, player2, p1Score, p2Score]],
             },
         });
-        const setsValues = setPoints.map(point => [point.player1, point.player2, matchId]);
+        const setsValues = setsPoints.map(point => [matchId, point.player1, point.player2]);
         await sheets.spreadsheets.values.append({
             spreadsheetId,
-            range: 'SetPoints',
+            range: 'SetsPoints',
             valueInputOption: 'USER_ENTERED',
             resource: {
                 values: setsValues,
