@@ -1,7 +1,7 @@
 const { google } = require('googleapis');
 require('dotenv').config();
 const { parseData } = require('../utils/stats.js');
-const { groupSetsByMatchId, joinMatchesWithSets } = require('../utils/joinMatchesWithSets.JS');
+const { groupSetsByMatchId, joinMatchesWithSets } = require('../utils/joinMatchesWithSets.js');
 
 module.exports = async (req, res) => {
     const credentials = JSON.parse(Buffer.from(process.env.JSON_KEYS, 'base64').toString('utf-8'));
