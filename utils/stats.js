@@ -45,7 +45,7 @@ function calculateStats() {
 
         wins[giocatore1] += score1;
         wins[giocatore2] += score2;
-        
+
         const mese = data.split('/')[1];
         // Track monthly stats
         if (!monthlyWinRates[mese]) {
@@ -90,14 +90,13 @@ function calculateMonthlyWinRates() {
 
 // Calculate badges for players
 function calculateBadges() {
-    const monthlyWins = {};
     const totalLosses = {};
     const winStreaks = {};
     const currentStreaks = {};
 
     players.forEach(player => {
         badges[player] = [];
-        totalLosses[player] = 0;
+        totalLosses[player] = totPlayed[player] - wins[player];
         winStreaks[player] = 0;
         currentStreaks[player] = 0;
     });
@@ -107,26 +106,12 @@ function calculateBadges() {
         const score2 = Number(p2) || 0;
         const mese = data.split('/')[1];
 
-        if (!monthlyWins[mese]) {
-            monthlyWins[mese] = {};
-        }
-        if (!monthlyWins[mese][giocatore1]) {
-            monthlyWins[mese][giocatore1] = 0;
-        }
-        if (!monthlyWins[mese][giocatore2]) {
-            monthlyWins[mese][giocatore2] = 0;
-        }
-
         if (score1 > score2) {
-            monthlyWins[mese][giocatore1]++;
             currentStreaks[giocatore1]++;
             currentStreaks[giocatore2] = 0;
-            totalLosses[giocatore2]++;
         } else if (score2 > score1) {
-            monthlyWins[mese][giocatore2]++;
             currentStreaks[giocatore2]++;
             currentStreaks[giocatore1] = 0;
-            totalLosses[giocatore1]++;
         }
 
         players.forEach(player => {
@@ -134,11 +119,11 @@ function calculateBadges() {
         });
     });
 
-    // Assign monthly badges
-    Object.keys(monthlyWins).forEach(mese => {
-        const topPlayer = Object.entries(monthlyWins[mese]).reduce((a, b) => (b[1] > a[1] ? b : a), [null, 0])[0];
+    // Assign monthly badges based on win rates
+    Object.keys(monthlyWinRates).forEach(mese => {
+        const topPlayer = Object.entries(monthlyWinRates[mese]).reduce((a, b) => (Number(b[1]) > Number(a[1]) ? b : a), [null, 0])[0];
         if (topPlayer) {
-            badges[topPlayer].push(`Vincitore del mese ${mese}`);
+            badges[topPlayer].push(`CHAMPION_OF_THE_MONTH-${mese}`);
         }
     });
 

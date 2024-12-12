@@ -31,8 +31,7 @@ module.exports = async (req, res) => {
         const matchesData = matchesResponse.data; // Raw data
 
         // Parse matches data using parseData
-        const { players, matches, wins, totPlayed, points, monthlyWinRates } = parseData(matchesData);
-        console.log(monthlyWinRates)
+        const { players, matches, wins, totPlayed, points, monthlyWinRates, badges } = parseData(matchesData);
         // Fetch setsPoint data
         const setsPointsResponse = await sheets.spreadsheets.values.get({
             spreadsheetId,
@@ -58,7 +57,8 @@ module.exports = async (req, res) => {
             wins,
             totPlayed,
             points,
-            monthlyWinRates
+            monthlyWinRates,
+            badges
         };
         res.status(200).json(objToSend);
     } catch (error) {
