@@ -148,10 +148,10 @@ function calculateBadges() {
     const longestStreak = Object.entries(winStreaks).reduce((a, b) => (b[1] > a[1] ? b : a), [null, 0])[0];
 
     if (mostPlayed) {
-        badges[mostPlayed].push('MAX_TOTAL_BADGE');
+        badges[mostPlayed].push('MAX_TOTAL');
     }
     if (mostLosses) {
-        badges[mostLosses].push('MAX_LOSSES_BADGE');
+        badges[mostLosses].push('MAX_LOSSES');
     }
     if (longestStreak) {
         badges[longestStreak].push('MAX_WIN_STREAK');
