@@ -3,6 +3,7 @@ let wins = {};
 let totPlayed = {};
 let points = {};
 let monthlyWinRates = {}; // Stores win rates for each player per month
+let badges = {}; // Stores badges for players
 let players = ['SALVO', 'RAFF', 'GIORGIO'];
 
 export function parseData(data) {
@@ -17,7 +18,8 @@ export function parseData(data) {
         wins,
         totPlayed,
         points,
-        monthlyWinRates, // Include monthly win rates in the return
+        monthlyWinRates,
+        badges, // Include badges in the return
     };
 }
 
@@ -27,6 +29,7 @@ function calculateStats() {
     totPlayed = {};
     points = {};
     monthlyWinRates = {}; // Reset monthly win rates
+    badges = {}; // Reset badges
 
     matches.forEach(({ giocatore1, giocatore2, p1, p2, data }) => {
         if (!wins[giocatore1]) wins[giocatore1] = 0;
@@ -64,6 +67,7 @@ function calculateStats() {
 
     calculatePoints();
     calculateMonthlyWinRates();
+    calculateBadges();
 }
 
 // Calculate win percentages for players
@@ -82,4 +86,74 @@ function calculateMonthlyWinRates() {
             monthlyWinRates[mese][player] = winRate; // Replace stats with win rate
         });
     });
+}
+
+// Calculate badges for players
+function calculateBadges() {
+    const monthlyWins = {};
+    const totalLosses = {};
+    const winStreaks = {};
+    const currentStreaks = {};
+
+    players.forEach(player => {
+        badges[player] = [];
+        totalLosses[player] = 0;
+        winStreaks[player] = 0;
+        currentStreaks[player] = 0;
+    });
+
+    matches.forEach(({ giocatore1, giocatore2, p1, p2, data }) => {
+        const score1 = Number(p1) || 0;
+        const score2 = Number(p2) || 0;
+        const mese = data.split('/')[1];
+
+        if (!monthlyWins[mese]) {
+            monthlyWins[mese] = {};
+        }
+        if (!monthlyWins[mese][giocatore1]) {
+            monthlyWins[mese][giocatore1] = 0;
+        }
+        if (!monthlyWins[mese][giocatore2]) {
+            monthlyWins[mese][giocatore2] = 0;
+        }
+
+        if (score1 > score2) {
+            monthlyWins[mese][giocatore1]++;
+            currentStreaks[giocatore1]++;
+            currentStreaks[giocatore2] = 0;
+            totalLosses[giocatore2]++;
+        } else if (score2 > score1) {
+            monthlyWins[mese][giocatore2]++;
+            currentStreaks[giocatore2]++;
+            currentStreaks[giocatore1] = 0;
+            totalLosses[giocatore1]++;
+        }
+
+        players.forEach(player => {
+            winStreaks[player] = Math.max(winStreaks[player], currentStreaks[player]);
+        });
+    });
+
+    // Assign monthly badges
+    Object.keys(monthlyWins).forEach(mese => {
+        const topPlayer = Object.entries(monthlyWins[mese]).reduce((a, b) => (b[1] > a[1] ? b : a), [null, 0])[0];
+        if (topPlayer) {
+            badges[topPlayer].push(`Vincitore del mese ${mese}`);
+        }
+    });
+
+    // Assign badges for most played games and losses
+    const mostPlayed = Object.entries(totPlayed).reduce((a, b) => (b[1] > a[1] ? b : a), [null, 0])[0];
+    const mostLosses = Object.entries(totalLosses).reduce((a, b) => (b[1] > a[1] ? b : a), [null, 0])[0];
+    const longestStreak = Object.entries(winStreaks).reduce((a, b) => (b[1] > a[1] ? b : a), [null, 0])[0];
+
+    if (mostPlayed) {
+        badges[mostPlayed].push('MAX_TOTAL_BADGE');
+    }
+    if (mostLosses) {
+        badges[mostLosses].push('MAX_LOSSES_BADGE');
+    }
+    if (longestStreak) {
+        badges[longestStreak].push('MAX_WIN_STREAK');
+    }
 }
