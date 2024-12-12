@@ -29,12 +29,10 @@ module.exports = async (req, res) => {
         }
 
         const matchesData = matchesResponse.data; // Raw data
-        console.log('Raw matchesData:', matchesData);
 
         // Parse matches data using parseData
-        const { players, matches, wins, totPlayed, points, } = parseData(matchesData);
-        console.log('Parsed matches:', matches);
-
+        const { players, matches, wins, totPlayed, points, monthlyWinRates } = parseData(matchesData);
+        console.log(monthlyWinRates)
         // Fetch setsPoint data
         const setsPointsResponse = await sheets.spreadsheets.values.get({
             spreadsheetId,
@@ -59,11 +57,9 @@ module.exports = async (req, res) => {
             matches: matchesWithSets,
             wins,
             totPlayed,
-            points
+            points,
+            monthlyWinRates
         };
-
-        console.log('Final objToSend:', objToSend);
-
         res.status(200).json(objToSend);
     } catch (error) {
         console.error('Error fetching matches or players:', error.message);
