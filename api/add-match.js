@@ -7,7 +7,7 @@ const app = express();
 
 const corsOptions = {
     origin: ['http://localhost:*', 'https://ping-pong-woad.vercel.app/'],
-    methods: [ 'POST'], // Allowed methods
+    methods: ['POST'], // Allowed methods
   };
 app.use(cors(corsOptions));
 
