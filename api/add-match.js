@@ -33,7 +33,7 @@ app.post('/api/add-match', async (req, res) => {
         const spreadsheetId = process.env.SPREADSHEET;
         await sheets.spreadsheets.values.append({
             spreadsheetId,
-            range: 'Partite',
+            range: 'Matches',
             valueInputOption: 'USER_ENTERED',
             resource: {
                 values: [[matchId, date, player1, player2, p1Score, p2Score]],

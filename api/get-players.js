@@ -18,13 +18,13 @@ module.exports = async (req, res) => {
 
         const response = await sheets.spreadsheets.values.get({
             spreadsheetId,
-            range: 'Giocatori', // The range from the Google Sheet
+            range: 'Players', // The range from the Google Sheet
         });
 
         const data = response.data.values;
 
         if (!data || data.length === 0) {
-            return res.status(404).json({ error: 'No data found in Giocatori sheet.' });
+            return res.status(404).json({ error: 'No data found in Players sheet.' });
         }
 
         const [headers, ...rows] = data; // Extract headers and player data
