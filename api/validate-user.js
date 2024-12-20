@@ -42,7 +42,7 @@ app.post('/api/validate-user', async (req, res) => {
             scopes: ['https://www.googleapis.com/auth/spreadsheets'],
         });
 
-        const { email } = req.body;
+        const email = req?.body?.email;
 
 
         if (!email) {
