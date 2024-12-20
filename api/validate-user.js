@@ -8,7 +8,7 @@ const app = express();
 // Configure CORS with dynamic origin handling
 const corsOptions = {
     origin: (origin, callback) => {
-        const allowedOrigins = ['http://localhost:5173', 'https://ping-pong-woad.vercel.app', "bs-local.com*", 'https://staging-ping-pong-woad.vercel.app/'];
+        const allowedOrigins = ['http://localhost:5173', 'https://ping-pong-woad.vercel.app', "bs-local.com*"];
         if (!origin || allowedOrigins.includes(origin)) {
             callback(null, true);
         } else {
