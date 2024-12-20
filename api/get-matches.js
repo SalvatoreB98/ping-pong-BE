@@ -21,11 +21,11 @@ module.exports = async (req, res) => {
         // Fetch matches data
         const matchesResponse = await sheets.spreadsheets.values.get({
             spreadsheetId,
-            range: 'Partite',
+            range: 'Matches',
         });
 
         if (!matchesResponse.data.values) {
-            return res.status(404).json({ error: 'No match data found in Partite sheet.' });
+            return res.status(404).json({ error: 'No match data found in Matches sheet.' });
         }
 
         const matchesData = matchesResponse.data; // Raw data
